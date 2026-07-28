@@ -1,0 +1,11 @@
+{
+  "localization_exact": 0.8756666666666667,
+  "localization_within1": 0.902,
+  "baseline_maxenergy_exact": 0.10066666666666667,
+  "baseline_maxenergy_within1": 0.2786666666666667,
+  "presence_acc": 0.9926666666666667,
+  "presence_threshold": 0.5199999999999999,
+  "presence_fusion_w": 0.15000000000000002,
+  "n": 3000,
+  "eval": "real_rolled"
+}
