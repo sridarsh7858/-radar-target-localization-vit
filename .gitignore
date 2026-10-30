@@ -34,3 +34,10 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# --- Paper drafts & personal copies (kept locally, not part of the code repo) ---
+/*.docx
+/*.pdf
+/*.pages
+paper_revisions/
+rithick/

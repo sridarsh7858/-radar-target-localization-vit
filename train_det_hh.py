@@ -1,12 +1,14 @@
 """
-HH-ONLY detector (single-pol, matching the report's stated methodology).
+SINGLE-POLARIZATION detector (matching the report's stated single-pol methodology).
 
 Minimal delta from train.py: identical data, augmentation, loss and checkpoint
-selection -- the only change is slicing polarization channel 0 (HH) from the
-4-pol dataset_v4 maps, and build_detector(n_pol=1). Short schedule for a
-deadline run: 18 epochs max, patience 6.
+selection -- the only change is slicing ONE polarization channel from the 4-pol
+dataset_v4 maps, and build_detector(n_pol=1). Short schedule for a deadline run:
+18 epochs max, patience 6.
 
-Checkpoint -> results_hh/checkpoints/det_hh.weights.h5
+--pol hh|hv|vh|vv selects the channel (default hh, the original run).
+Checkpoint -> results_hh/checkpoints/det_<pol>.weights.h5
+(hh keeps its original filename det_hh.weights.h5 so existing paths still resolve.)
 """
 import argparse
 import os
@@ -18,37 +20,45 @@ from model import build_detector
 from train import RDSequence, RealPresVal, make_sched
 
 RES_DIR = "results_hh"
-DET_CKPT = os.path.join(RES_DIR, "checkpoints", "det_hh.weights.h5")
+POL_CH = {"hh": 0, "hv": 1, "vh": 2, "vv": 3}       # channel order in the .npy maps
 
 
-class HHSequence(RDSequence):
-    """RDSequence that returns only the HH channel (pol 0)."""
+class PolSequence(RDSequence):
+    """RDSequence that returns only one polarization channel."""
+
+    def __init__(self, *a, ch=0, **kw):
+        self.ch = ch
+        super().__init__(*a, **kw)
 
     def __getitem__(self, b):
         X, y, w = super().__getitem__(b)
-        return X[..., :1], y, w
+        return X[..., self.ch:self.ch + 1], y, w
 
 
-class HHRealPresVal(RealPresVal):
-    """RealPresVal on the HH channel only."""
+class PolRealPresVal(RealPresVal):
+    """RealPresVal on one polarization channel only."""
 
-    def __init__(self, *a, **kw):
+    def __init__(self, *a, ch=0, **kw):
         super().__init__(*a, **kw)
-        self.X = self.X[..., :1]
+        self.X = self.X[..., ch:ch + 1]
 
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--pol", choices=list(POL_CH), default="hh",
+                    help="polarization channel to train on")
     ap.add_argument("--epochs", type=int, default=18)
     ap.add_argument("--batch", type=int, default=32)
     ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--patience", type=int, default=6)
     args = ap.parse_args()
+    ch = POL_CH[args.pol]
+    ckpt = os.path.join(RES_DIR, "checkpoints", f"det_{args.pol}.weights.h5")
     os.makedirs(os.path.join(RES_DIR, "checkpoints"), exist_ok=True)
 
-    print("\n========== TRAINING DETECTOR (HH only) ==========")
-    trd = HHSequence("train", args.batch, augment=True, shuffle=True, task="det")
-    vad = HHSequence("val", args.batch, task="det")
+    print(f"\n========== TRAINING DETECTOR ({args.pol.upper()} only, ch {ch}) ==========")
+    trd = PolSequence("train", args.batch, augment=True, shuffle=True, task="det", ch=ch)
+    vad = PolSequence("val", args.batch, task="det", ch=ch)
     det = build_detector(n_pol=1)
     det.compile(
         optimizer=keras.optimizers.AdamW(make_sched(args.epochs, len(trd), args.lr),
@@ -57,9 +67,9 @@ def main():
         metrics={"presence": [keras.metrics.AUC(name="auc"),
                               keras.metrics.BinaryAccuracy(name="acc")]})
     det.fit(trd, validation_data=vad, epochs=args.epochs, verbose=1, callbacks=[
-        HHRealPresVal(DET_CKPT, patience=args.patience),
-        keras.callbacks.CSVLogger(os.path.join(RES_DIR, "train_log_det_hh.csv"))])
-    print(f"HH detector best -> {DET_CKPT}")
+        PolRealPresVal(ckpt, patience=args.patience, ch=ch),
+        keras.callbacks.CSVLogger(os.path.join(RES_DIR, f"train_log_det_{args.pol}.csv"))])
+    print(f"{args.pol.upper()} detector best -> {ckpt}")
 
 
 if __name__ == "__main__":

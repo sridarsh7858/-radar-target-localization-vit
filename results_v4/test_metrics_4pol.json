@@ -1,0 +1,32 @@
+{
+  "pol": "all",
+  "n_pol": 4,
+  "ckpt": "baseline_v4_backup/det.weights.h5",
+  "fusion": false,
+  "threshold": 0.5499999999999999,
+  "val_balanced_acc": 0.9981818181818182,
+  "pd_native": 0.9963636363636363,
+  "n_native": 825,
+  "pd_rolled": 0.9966666666666667,
+  "n_rolled": 3000,
+  "pfa_genuine": 0.0,
+  "n_genuine": 75,
+  "pfa_excised": 0.012,
+  "n_excised": 750,
+  "balanced_acc": 0.9931666666666666,
+  "auc_genuine": 1.0,
+  "auc_all": 0.9998135555555556,
+  "cm_balanced": {
+    "tn": 2969,
+    "fp": 31,
+    "fn": 10,
+    "tp": 2990
+  },
+  "cm_raw": {
+    "tn": 816,
+    "fp": 9,
+    "fn": 10,
+    "tp": 2990
+  },
+  "raw_acc": 0.9950326797385621
+}

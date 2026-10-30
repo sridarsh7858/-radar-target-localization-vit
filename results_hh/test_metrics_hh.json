@@ -1,0 +1,32 @@
+{
+  "pol": "hh",
+  "n_pol": 1,
+  "ckpt": "results_hh/checkpoints/det_hh.weights.h5",
+  "fusion": false,
+  "threshold": 0.42999999999999994,
+  "val_balanced_acc": 0.9757575757575757,
+  "pd_native": 0.9733333333333334,
+  "n_native": 825,
+  "pd_rolled": 0.9726666666666667,
+  "n_rolled": 3000,
+  "pfa_genuine": 0.22666666666666666,
+  "n_genuine": 75,
+  "pfa_excised": 0.025333333333333333,
+  "n_excised": 750,
+  "balanced_acc": 0.9651666666666666,
+  "auc_genuine": 0.9797511111111111,
+  "auc_all": 0.9948543333333333,
+  "cm_balanced": {
+    "tn": 2873,
+    "fp": 127,
+    "fn": 82,
+    "tp": 2918
+  },
+  "cm_raw": {
+    "tn": 789,
+    "fp": 36,
+    "fn": 82,
+    "tp": 2918
+  },
+  "raw_acc": 0.9691503267973857
+}
